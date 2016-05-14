@@ -33,13 +33,41 @@ work on this implementation off of. However, I need something that also does the
 - Will always force a single instance of a socket regardless of the number of subscriptions.
 - Will buffer messages fed to it via `onNext` if the underlying socket isn't open, send them all when it does open.
 
-## Basic Usage
+## Creating the subject
 
 ```js
+
+//connections {Rx.Observable} an observable of connection information, either endpoint URL strings, 
+//            or objects with `{ url: someUrl, protocol: someProtocol }`.
+var connections = Rx.Observable.just('ws://echo.websocket.org');
+
 // create a socket subject
 // at this point an underlying WebSocket has not yet been created
-var socket = RxSocketSubject.create('ws://echo.websocket.org');
+var socket1 = RxSocketSubject.create(connections);
 
+//annitional open error and closing observables could be provided
+var openSubject = new Rx.Subject();
+var errorSubject = new Rx.Subject();
+var closingSubject = new Rx.Subject();
+
+var socket2 = RxSocketSubject.create(connections,openSubject,errorSubject,closingSubject);
+
+//you could also 
+var createOptions = {
+	connections: connections,
+	openObserver: openSubject,
+	errorObserver: errorSubject,
+	closingObserver: closingSubject
+};
+
+var socket3 = RxSocketSubject.create(createOptions);
+
+```
+
+
+##sending Messages
+
+```js
 // use the socket subject as an Observer and send
 // messages with onNext()
 // even though the underlying socket still hasn't been created,
@@ -47,6 +75,11 @@ var socket = RxSocketSubject.create('ws://echo.websocket.org');
 socket.onNext('one');
 socket.onNext('two');
 
+```
+
+
+##Subscribing the socket
+```js
 // subscribing to the socket subject as an Observable
 // will start the socket and connect.
 socket.forEach(function(e) {
