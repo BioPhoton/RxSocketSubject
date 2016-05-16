@@ -64,7 +64,6 @@ var socket3 = RxSocketSubject.create(createOptions);
 
 ```
 
-
 ##sending Messages
 
 ```js
@@ -77,11 +76,13 @@ socket.onNext('two');
 
 ```
 
-
-##Subscribing the socket
+##Creating the socket
 ```js
+var socket = RxSocketSubject.create(connections);
+
 // subscribing to the socket subject as an Observable
 // will start the socket and connect.
+//all previous messages that are buffert will be sent emediately after creating the socket
 socket.forEach(function(e) {
 	console.log(e); // raw message events are emitted
 });
@@ -91,8 +92,16 @@ setTimeout(function(){
   // immediately through it.
 	socket.onNext('three');
 }, 1000);
-```
 
+//if you want to start the socket without any subscriptions use the an openObesrvabel to trigger 
+//creation of websocket
+var socket2 = RxSocketSubject.create(connections,openSubject);
+
+//websocket creatinon on open value
+//The value in the onNext function itselve is not relevant...
+openSubject.onNext('open the stream without subscriptions');
+
+```
 
 ## Closing the socket
 
